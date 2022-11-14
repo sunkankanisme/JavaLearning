@@ -696,11 +696,14 @@ static class SingletonL {
 
 
 
-- 懒汉式-双重检查锁
+- 懒汉式-双重检查锁 DCL
 
 ```java
 static class SingletonL {
-    private static SingletonL INSTANCE = null;
+    /*
+         * 保证线程之间的可见性和有序性
+         */
+    private static volatile SingletonL INSTANCE = null;
 
     private SingletonL() {
     }
@@ -717,17 +720,18 @@ static class SingletonL {
 
         return INSTANCE;
     }
-}
 ```
 
+`volatile`：禁止指令重排，`new Instance()` 并不是原子性的，防止对象未完全初始化就被其他线程使用
 
+![image-20221114210629277](C:\Users\sunkl\AppData\Roaming\Typora\typora-user-images\image-20221114210629277.png)
 
 
 
 - 枚举类
 
 ```java
-// 使用枚举类创建单例
+// 使用枚举类创建单例（饿汉式）
 enum SingletonEnum {
     INSTANCE;
 
@@ -743,6 +747,30 @@ enum SingletonEnum {
 
 
 
+- 内部类
+
+```java
+/*
+ * 懒汉式单例，推荐
+ */
+class SingletonInnerClass implements Serializable{
+    private SingletonInnerClass() {
+
+    }
+
+    /*
+     * 创建静态内部类
+     */
+    private static class Holder{
+        static SingletonInnerClass INSTANCE = new SingletonInnerClass();
+    }
+
+    public static SingletonInnerClass getInstance() {
+        return Holder.INSTANCE;
+    }
+}
+```
+
 
 
 #### 4.2 Unsafe
@@ -751,11 +779,36 @@ enum SingletonEnum {
 
 
 
+#### 4.3 单例模式案例
 
+> jdk 中的单例模式
 
+`java.lang.Runtime`
 
+```txt
 
+```
 
+`java.lang.System`
+
+```java
+public static Console console() {
+    if (cons == null) {
+        synchronized (System.class) {
+            cons = sun.misc.SharedSecrets.getJavaIOAccess().console();
+        }
+    }
+    return cons;
+}
+```
+
+`java.util.Collections`
+
+```java
+// 内部类
+java.util.Collections.EmptySet
+java.util.Collections#emptyListIterator
+```
 
 
 

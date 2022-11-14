@@ -1,11 +1,14 @@
 package com.sunk.interview;
 
-import java.io.Serial;
 import java.io.Serializable;
+import java.util.Collections;
 
 public class Singleton {
 
     public static void main(String[] args) {
+        Runtime.getRuntime().gc();
+
+        System.gc();
 
 
     }
@@ -25,7 +28,6 @@ public class Singleton {
         }
 
         // 预防使用序列化破坏单例的手段
-        @Serial
         public Object readResolve() {
             return instance;
         }
@@ -55,7 +57,10 @@ public class Singleton {
      * 懒汉式单例
      */
     static class SingletonL {
-        private static SingletonL INSTANCE = null;
+        /*
+         * 保证线程之间的可见性和有序性
+         */
+        private static volatile SingletonL INSTANCE = null;
 
         private SingletonL() {
         }
@@ -73,6 +78,24 @@ public class Singleton {
             return INSTANCE;
         }
     }
+}
 
+/*
+ * 懒汉式单例
+ */
+class SingletonInnerClass implements Serializable {
+    private SingletonInnerClass() {
 
+    }
+
+    /*
+     * 创建静态内部类
+     */
+    private static class Holder {
+        static SingletonInnerClass INSTANCE = new SingletonInnerClass();
+    }
+
+    public static SingletonInnerClass getInstance() {
+        return Holder.INSTANCE;
+    }
 }

@@ -1,6 +1,6 @@
 # Java 面试八股
 
-### 1 二分查找
+## 1 二分查找
 
 - 实现思路
 
@@ -78,7 +78,7 @@ private static int binarySearch(int[] array, int target) {
 
 
 
-### 2 排序算法
+## 2 排序算法
 
 > 目标：
 >
@@ -110,7 +110,7 @@ https://en.wikipedia.org/wiki/Sorting_algorithm
 
 
 
-#### 2.1 冒泡排序
+### 2.1 冒泡排序
 
 - 实现思路
 
@@ -184,7 +184,7 @@ public static void bubbleV2(int[] a) {
 
 
 
-#### 2.2 选择排序
+### 2.2 选择排序
 
 - 实现思路
 
@@ -235,7 +235,7 @@ private static void selection(int[] a) {
 
 
 
-#### 2.3 插入排序
+### 2.3 插入排序
 
 - 文字描述
 
@@ -301,7 +301,7 @@ public static void insert(int[] a) {
 
 
 
-#### 2.4 希尔排序
+### 2.4 希尔排序
 
 > 解决插入排序较大元素移动次数过多的问题，使用变化的间隙进行分组，对组内的元素进行插入排序，当间隙的值为 1 时，完成一次正常的插入排序即完成数组的排序。
 
@@ -309,7 +309,7 @@ https://en.wikipedia.org/wiki/Shellsort
 
 
 
-#### 2.5 快速排序
+### 2.5 快速排序
 
 - 文字描述
 
@@ -461,6 +461,339 @@ private static int partition2(int[] a, int low, int high) {
 2 数据量较大时, 优势非常明显
 
 3 属于不稳定排序
+
+
+
+## 3 集合
+
+- 目标
+
+1 掌握 Arraylist 的扩容机制
+
+2 掌握 Iterator 的 fail-fast、fail-safe 机制
+
+
+
+### 3.1 Arraylist
+
+#### 3.1.1 扩容机制
+
+- `add`
+
+无参的 ArrayList 默认初始大小是 0，当添加新元素时，触发首次扩容大小为 10，使用新数组代替旧数组。当数组元素满了之后触发第二次扩容，扩容至当前大小的 1.5 倍，计算方式是 `oldSize + (oldSize >> 1)`。
+
+`0 -> 10 -> 15 -> 22 -> ...`
+
+
+
+- `addAll(Collection e)`
+
+无元素：`max(10, 实际元素个数)`
+
+有元素：`max(原容量 * 1.5), 实际元素个数`
+
+
+
+#### 3.1.2 迭代器特性
+
+> fail-fast：一旦遍历时发现更改，则抛出异常
+>
+> fail-safe: 一旦遍历时发现更改，应当能有应对策略，例如牺牲一定的一致性让整个遍历完成
+
+
+
+ArrayList 采用的是 fail-fast，当在遍历过程中修改之后会抛出并发修改异常，CopyOnWriteArrayList 采用的是 fail-safe
+
+- 实现原理
+
+> fail-fast：`iter.modCount != list.expectedModCount`
+>
+> fail-safe:  使用快照记录当前集合，对快照进行遍历，添加元素时将原数组复制出来再添加不会影响到旧数组（读写分离）
+
+
+
+### 3.2 LinkedList
+
+#### 3.2.1 ArrayList 和 LinkedList
+
+|              | **ArrayList**                                                | **LinkedList**                              |
+| ------------ | ------------------------------------------------------------ | ------------------------------------------- |
+| 底层数据结构 | 基于数组，需要连续内存                                       | 基于双向链表，无需连续内存                  |
+| 随机访问能力 | 随机访问快，基于下标访问                                     | 随机访问慢，要沿着链表遍历                  |
+| 增删元素能力 | 尾部插入和删除性能较好，<br/>其他部分插入和删除元素都会移动元素因此性能会低 | 头尾插入性能较高，<br/>中间操作涉及链表遍历 |
+| *            | 可以利用 cpu 缓存，局部性原理                                | 占用内存多                                  |
+
+
+
+### 3.3 HashMap
+
+#### 3.1 底层数据结构
+
+- Java 1.7 和 1.8 之后有何不同
+
+> jdk 1.7 数组加链表
+>
+> jdk 1.8 数组加（链表 | 红黑树）
+
+
+
+- 为什么使用红黑树，为什么不直接使用树，何时会树化，何时会退化为链表？
+
+**扩容：**元素个数超过到总个数的 3 / 4，或当同一链表元素个数超过 8 个且数组容量 <= 64（优先扩容解决链表过长）
+
+**为何使用红黑树：**红黑树用来避免 Dos 攻击，防止链表超长时性能下降，树化是偶然情况；链表的查找、更新的时间复杂度是 O(1)，而红黑树的查找更新时间复杂度是 O(log<sub>2</sub>n)，TreeNode 占用空间也比普通的 Node 大，如非必要尽量还是使用链表
+
+**树化：**链表元素个数超过 8，且数组容量 >= 64。链表过长影响性能，使用二叉树可以提升查找性能
+
+**退化：**在扩容时如果拆分树，树的元素个数小于 6 则会退化为链表；remove 树节点前检查，若 root，root.left，root.right，root.left.left 有一个为 null，也会退化为链表
+
+
+
+#### 3.2 索引计算
+
+- 计算方法
+
+计算对象的 hashcode()，在调用 HashMap 的 hash() 方法进行二次哈希，最后 &(capacity - 1) 得到索引
+
+`HashMap.hash(key.hashcode()) & (capacity - 1)`
+
+
+
+- 二次哈希的作用
+
+二次哈希是为了综合高位数据，让 hash 分布更为均匀，防止超长链表的产生
+
+
+
+- 容量为 2 的 n 次幂的作用
+
+计算索引时，如果是 2 的 n 次幂可以使用位运算代替取模，销量更高；扩容时 `hash & oldCap == 0` 的元素留在原来的位置，不满足的元素 `新位置 = 原始位置 + oldCap`
+
+
+
+#### 3.3 put 方法流程
+
+- 基本流程
+
+1 HashMap 是懒惰创建数组的，首次使用才创建
+
+2 计算索引（桶下标）
+
+3 如果桶下标还没有人占用，创建 Node 占位返回
+
+4 如果桶下标已经有人占用
+
+​	① 已经是 TreeNode 走红黑树的添加或者更新逻辑
+
+​	② 是普通的 Node，走链表的添加或更新逻辑，如果链表长度超过树化阈值，走树化逻辑
+
+5 返回前检查容量是否超过了阈值，一旦超过则进行扩容（新添加元素再检查扩容）
+
+
+
+- Java 1.7 和 1.8 的 Put 方法有何不同
+
+① 链表插入节点时，1.7 是头插法，1.8 是尾插法
+
+② 扩容时 1.7 是大于等于阈值且没有空位时才扩容，而 1.8 是大于阈值就扩容
+
+③ 1.8 在扩容计算 Node 索引时，会优化
+
+
+
+- 加载（扩容）因子为何默认是 0.75f
+
+1 取 0.75 是在空间占用与查询时间之间取得较好的权衡
+
+2 大于这个值，空间节省了，但是链表会较长影响性能
+
+3 小于这个值，冲突减少了，但是扩容会更加频繁，空间占用多
+
+
+
+#### 3.4 面试题
+
+- 多线程下的问题
+
+扩容死链（Java 1.7）：链表内的元素相互引用 `a <--> b`
+
+数据错乱（Java 1.7 / 1.8）：丢失插入的数据
+
+
+
+- key 是否可以为 null，作为 key 的对象有什么要求？
+
+1 HashMap 的 key 可以作为 null，但 Map 的其它实现则不然
+
+2 作为 key 的对象必须重写 hashcode 和 equals 方法，且 key 的内容不能修改
+
+
+
+- String 对象的 hashcode() 是如何设计的，为啥每次乘的是 31
+
+> 目标是达到较为均匀的散列效果，每个字符串的 hashcode 足够独特，31 的散列特性比较好，31 的乘法运算可以被优化
+
+
+
+### 4 设计模式
+
+#### 4.1 单例模式
+
+> 掌握单例模式常见的 5 种实现方式
+>
+> 了解 Jdk 中有哪些地方体现了单例模式
+
+
+
+- 饿汉式
+
+> 构造方法私有化、定义私有的静态 `private static final` 的成员变量实例，提供获取实例的方法
+
+```java
+static class SingletonE implements Serializable {
+    private static final SingletonE instance = new SingletonE();
+
+    private SingletonE() {
+        // 预防使用反射破坏单例的手段
+        if (instance != null) {
+            throw new RuntimeException("单例对象不能重复创建");
+        }
+    }
+
+    public static SingletonE getInstance() {
+        return instance;
+    }
+
+    // 预防使用序列化破坏单例的手段
+    @Serial
+    public Object readResolve() {
+        return instance;
+    }
+}
+```
+
+
+
+- 懒汉式-同步方法
+
+```java
+static class SingletonL {
+    private static SingletonL INSTANCE = null;
+
+    private SingletonL() {
+    }
+
+    // 使用同步代码块
+    public synchronized static SingletonL getINSTANCE() {
+        if (INSTANCE == null) {
+            INSTANCE = new SingletonL();
+        }
+
+        return INSTANCE;
+    }
+}
+```
+
+
+
+- 懒汉式-双重检查锁
+
+```java
+static class SingletonL {
+    private static SingletonL INSTANCE = null;
+
+    private SingletonL() {
+    }
+
+    // 双重检查锁
+    public static SingletonL getINSTANCE() {
+        if (INSTANCE == null) {
+            synchronized (SingletonL.class) {
+                if (INSTANCE != null) {
+                    INSTANCE = new SingletonL();
+                }
+            }
+        }
+
+        return INSTANCE;
+    }
+}
+```
+
+
+
+
+
+- 枚举类
+
+```java
+// 使用枚举类创建单例
+enum SingletonEnum {
+    INSTANCE;
+
+    private SingletonEnum() {
+        System.out.println("private SingletonEnum");
+    }
+
+    public static SingletonEnum getInstance() {
+        return INSTANCE;
+    }
+}
+```
+
+
+
+
+
+#### 4.2 Unsafe
+
+![image-20221114181415041](D:\System\Picture\markdown\README\image-20221114181415041.png)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

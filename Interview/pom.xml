@@ -17,6 +17,13 @@
             <version>4.13.2</version>
             <scope>compile</scope>
         </dependency>
+
+        <!-- 查看对象占用内存的工具包 -->
+        <dependency>
+            <groupId>org.openjdk.jol</groupId>
+            <artifactId>jol-core</artifactId>
+            <version>0.16</version>
+        </dependency>
     </dependencies>
 
     <properties>

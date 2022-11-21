@@ -490,7 +490,7 @@ private static int partition2(int[] a, int low, int high) {
 
 无元素：`max(10, 实际元素个数)`
 
-有元素：`max(原容量 * 1.5), 实际元素个数`
+有元素：`max(原容量 * 1.5, 实际元素个数)`
 
 
 
@@ -539,7 +539,7 @@ ArrayList 采用的是 fail-fast，当在遍历过程中修改之后会抛出并
 
 - 为什么使用红黑树，为什么不直接使用树，何时会树化，何时会退化为链表？
 
-**扩容：**元素个数超过到总个数的 3 / 4，或当同一链表元素个数超过 8 个且数组容量 <= 64（优先扩容解决链表过长）
+**扩容：**HashMap 初始化大小为 16，元素个数超过到总个数的 3 / 4，或当同一链表元素个数超过 8 个且数组容量 <= 64（优先扩容解决链表过长）
 
 **为何使用红黑树：**红黑树用来避免 Dos 攻击，防止链表超长时性能下降，树化是偶然情况；链表的查找、更新的时间复杂度是 O(1)，而红黑树的查找更新时间复杂度是 O(log<sub>2</sub>n)，TreeNode 占用空间也比普通的 Node 大，如非必要尽量还是使用链表
 
@@ -635,9 +635,9 @@ ArrayList 采用的是 fail-fast，当在遍历过程中修改之后会抛出并
 
 
 
-### 4 设计模式
+## 4 设计模式
 
-#### 4.1 单例模式
+### 4.1 单例模式
 
 > 掌握单例模式常见的 5 种实现方式
 >
@@ -674,6 +674,25 @@ static class SingletonE implements Serializable {
 
 
 
+- 饿汉式-枚举类
+
+```java
+// 使用枚举类创建单例（饿汉式）
+enum SingletonEnum {
+    INSTANCE;
+
+    private SingletonEnum() {
+        System.out.println("private SingletonEnum");
+    }
+
+    public static SingletonEnum getInstance() {
+        return INSTANCE;
+    }
+}
+```
+
+
+
 - 懒汉式-同步方法
 
 ```java
@@ -701,8 +720,8 @@ static class SingletonL {
 ```java
 static class SingletonL {
     /*
-         * 保证线程之间的可见性和有序性
-         */
+     * 保证线程之间的可见性和有序性
+     */
     private static volatile SingletonL INSTANCE = null;
 
     private SingletonL() {
@@ -728,26 +747,7 @@ static class SingletonL {
 
 
 
-- 枚举类
-
-```java
-// 使用枚举类创建单例（饿汉式）
-enum SingletonEnum {
-    INSTANCE;
-
-    private SingletonEnum() {
-        System.out.println("private SingletonEnum");
-    }
-
-    public static SingletonEnum getInstance() {
-        return INSTANCE;
-    }
-}
-```
-
-
-
-- 内部类
+- 懒汉式-内部类
 
 ```java
 /*
@@ -773,13 +773,13 @@ class SingletonInnerClass implements Serializable{
 
 
 
-#### 4.2 Unsafe
+### 4.2 Unsafe
 
 ![image-20221114181415041](D:\System\Picture\markdown\README\image-20221114181415041.png)
 
 
 
-#### 4.3 单例模式案例
+### 4.3 单例模式案例
 
 > jdk 中的单例模式
 
@@ -809,6 +809,152 @@ public static Console console() {
 java.util.Collections.EmptySet
 java.util.Collections#emptyListIterator
 ```
+
+
+
+
+
+## 5 并发篇
+
+### 5.1 线程的状态
+
+> 掌握 Java 线程的状态
+>
+> 掌握 Java 线程状态之间转换
+>
+> 辨析两种说法，六种状态 vs 五种状态
+
+
+
+- Java 线程的状态
+
+![image-20221116102555909](D:\System\Picture\markdown\README\image-20221116102555909.png)
+
+- 五种状态的说法
+
+![image-20221116104725865](D:\System\Picture\markdown\README\image-20221116104725865.png)
+
+
+
+### 5.2 线程池的核心参数
+
+- 常用的线程池
+
+- 线程池的核心参数
+
+1 `corePoolSize`：核心线程的数目，最多保留的线程数
+
+2 `maximumPoolSize`：最大线程数目，核心线程 + 救急线程
+
+3 ` keepAliveTime`：生存时间，针对救急线程的空闲存活时间
+
+4 `unit`：时间单位，针对救急线程
+
+5 `workQueue`：阻塞队列，用于存放暂时无法处理的任务
+
+6 `threadFactory`：线程工厂，可以为线程创建时起个好名字
+
+7 `handler`：拒绝策略，四种
+
+
+
+**救急线程：**当核心线程都在忙，同时任务队列也放满了，这时候就要使用到救急线程来执行任务。救急线程执行完成之后，受 3，4 条件控制，在时间范围内没有任务则终止救急线程。
+
+**拒绝策略：**当核心线程，任务队列，救急线程都无法处理时，再有新的任务到达时的策略
+
+> AbortPolicy：抛出异常
+>
+> CallerRunsPolicy：由调用者 submit 线程来执行任务
+>
+> DiscardPolicy：丢弃任务
+>
+> DiscardOldestPolicy：丢弃最老的任务，自身加入任务队列中
+
+
+
+### 5.2 sleep vs wait
+
+- 共同点
+
+`wait()`, `wait(long)`, `sleep(long)` 的效果都是让当前线程暂时放弃 cpu 的使用权进入阻塞状态
+
+
+
+- 不同点
+
+**方法归属不同：**sleep(long) 是 Thread 的静态方法，而 wait(), wait(long) 都是 Object 的成员方法，每个对象都有
+
+**醒来时机不同：**执行 sleep(long) 和 wait(long) 的线程都会在等待指定的毫秒后醒来；wait(long) 和 wait() 还可以被 notify() 唤醒，wait() 如果不唤醒则会一直等待下去；它们都可以被打断唤醒 `new Thread().interrupt()`
+
+**锁的特性不同：**wait() 的调用必须先获取 wait 对象的锁，而 sleep 则无此限制；wait() 会在执行后释放对象锁，允许其他线程获得对象锁，而 sleep 如果在 synchronized 代码块中执行，并不会释放对象锁
+
+
+
+### 5.3 lock vs synchronized
+
+- 语法层面
+
+1 synchronized 是关键字，源码在 jvm 中，用 c++ 语言实现
+
+2 Lock 是接口，源码由 jdk 提供，用 Java 语言实现
+
+3 使用 synchronized 时，退出同步代码块即会自动释放锁，而使用 Lock 时，需要手动调用 unlock 方法释放锁
+
+- 功能层面
+
+1 二者均属于悲观锁、都具备锁的互斥、同步、锁重入（给同一个对象加多道锁）功能
+
+2 Lock 提供了许多 synchronized 不具备的功能，例如获取等待状态、公平锁、可打断、可超时、多条件变量
+
+3 Lock 有适合不同场景的实现，如：ReentrantLock，ReentrantReadWriteLock
+
+- 性能层面
+
+1 没有激烈竞争时，synchronized 做了很多优化，如 偏向锁、轻量级锁、性能不错
+
+2 在竞争激烈时，Lock 的实现通常会提供更好的性能
+
+
+
+### 5.4 volatile 
+
+- volatile 能否保证线程安全？
+
+> 线程安全主要考虑三个方面：可见性、有序性、原子性
+>
+> 1 可见性：一个线程对共享变量的修改，另一个线程能看到最新的结果（JIT编译器导致可见性失效）
+>
+> 2 有序性：一个线程内代码按照编写顺序执行
+>
+> 3 原子性：一个线程内多行代码以一个整体运行，期间不能有其他线程的代码插队
+
+volatile 修饰的变量只能保证可见性和有序性（加屏障），但是并不能保证原子性
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

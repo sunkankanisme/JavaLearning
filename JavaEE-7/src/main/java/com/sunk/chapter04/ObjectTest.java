@@ -4,69 +4,34 @@ package com.sunk.chapter04;
 import java.util.Arrays;
 
 public class ObjectTest {
-
     public static void main(String[] args) {
-        final Dog dog = new Dog();
-        dog.speak("旺~");
-    }
+        byte[] bs = new byte[12];
 
-}
+        final byte[] bytes = "abc".getBytes();
 
-class Animal {
-    String color = "black";
+        System.out.println(Arrays.toString(bytes));
 
-    void speak(String sth) {
-        System.out.println("speak: " + sth);
-    }
-}
+        final char[] chars = "abc".toCharArray();
+        System.out.println(Arrays.toString(chars));
 
-class Dog extends Animal {
 
-}
 
-class Cat extends Animal {
-    String color = "red";
-
-    @Override
-    void speak(String sth) {
-        System.out.println("I am Cat");
-    }
-
-    public String returnColors() {
-        // 使用 super 获取父类的属性和方法
-        final String parentColor = super.color;
-        // 使用 this 获取当前类的属性和方法，默认可以省略
-        final String sonColor = this.color;
-
-        return parentColor + " -> " + sonColor;
     }
 }
 
-
-class Parent {
-    String name;
-
-    public Parent() {
-
+class User {
+    void login(String username, String password) {
+        System.out.println("账号登录");
     }
 
-    public Parent(String name) {
-        this.name = name;
-    }
-}
-
-class Son extends Parent {
-
-    public Son() {
-
+    void login(String phoneNum) {
+        System.out.println("手机验证码登录" + phoneNum);
     }
 
-    public Son(String name) {
-        super(name);
+    void login() {
+        System.out.println("微信支付宝登录");
     }
 }
-
-
 
 
 

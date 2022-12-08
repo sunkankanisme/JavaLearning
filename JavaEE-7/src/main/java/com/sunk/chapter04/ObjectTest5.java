@@ -4,19 +4,27 @@ package com.sunk.chapter04;
 public class ObjectTest5 {
 
     public static void main(String[] args) {
-        final User5 user5 = new User5("");
+        final User5 user5 = new User5() {
+            @Override
+            public void eat() {
 
+            }
+        };
 
     }
 
 }
 
-class User5 {
-    public final String name;
+abstract class User5 {
 
-    public User5(final String name) {
-        this.name = name;
+    public abstract void eat();
 
+}
+
+class Chinese extends User5 {
+    @Override
+    public void eat() {
+        System.out.println("我是中国人，使用筷子吃饭");
     }
 }
 

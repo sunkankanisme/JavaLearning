@@ -12,6 +12,7 @@
         <module>Interview</module>
         <module>JUC</module>
         <module>JavaEE-7</module>
+        <module>DataSource</module>
     </modules>
 
     <properties>

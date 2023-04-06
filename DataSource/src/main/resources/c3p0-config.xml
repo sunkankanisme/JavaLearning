@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<c3p0-config>
+    <!--默认配置。详细配置可查阅在线文档：https://tool.oschina.net/apidocs/apidoc?api=c3p0 -->
+    <default-config>
+        <property name="initialPoolSize">10</property>
+        <property name="maxIdleTime">30</property>
+        <property name="maxPoolSize">100</property>
+        <property name="minPoolSize">10</property>
+        <property name="maxStatements">200</property>
+    </default-config>
+
+    <!--配置连接池mysql-->
+    <named-config name="mysql">
+        <property name="driverClass">com.mysql.jdbc.Driver</property>
+        <property name="jdbcUrl">jdbc:mysql://hadoop101:3306/spark?rewriteBatchedStatements=true&amp;serverTimezone=GMT%2b8&amp;useUnicode=true&amp;characterEncoding=utf8&amp;useSSL=false</property>
+        <property name="user">root</property>
+        <property name="password">000000</property>
+        <property name="initialPoolSize">1</property>
+        <property name="maxIdleTime">30</property>
+        <property name="maxPoolSize">3</property>
+        <property name="minPoolSize">1</property>
+        <property name="maxStatements">200</property>
+    </named-config>
+
+</c3p0-config>
